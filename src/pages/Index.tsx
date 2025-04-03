@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ArrowDown, 
@@ -14,16 +14,53 @@ import {
   BookOpen,
   Trophy,
   Languages,
-  MessageSquare
+  MessageSquare,
+  Sparkles,
+  Heart,
+  Coffee
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState("home");
   const [showEasterEgg, setShowEasterEgg] = useState(false);
+  const [easterEggType, setEasterEggType] = useState<string>("");
   const { toast } = useToast();
   const [konami, setKonami] = useState<string[]>([]);
   const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+  const [clickCount, setClickCount] = useState(0);
+  const [secretClicks, setSecretClicks] = useState(0);
+  const [showSparkles, setShowSparkles] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  
+  // Refs for blur blobs
+  const blob1Ref = useRef<HTMLDivElement>(null);
+  const blob2Ref = useRef<HTMLDivElement>(null);
+  
+  // Track mouse position for blob movement
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+      
+      // Move blobs on mouse movement with a damping effect
+      if (blob1Ref.current) {
+        const x = (e.clientX / window.innerWidth) * 20 - 10;
+        const y = (e.clientY / window.innerHeight) * 20 - 10;
+        blob1Ref.current.style.transform = `translate(${x}px, ${y}px)`;
+      }
+      
+      if (blob2Ref.current) {
+        const x = (e.clientX / window.innerWidth) * -20 + 10;
+        const y = (e.clientY / window.innerHeight) * -20 + 10;
+        blob2Ref.current.style.transform = `translate(${x}px, ${y}px)`;
+      }
+    };
+    
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
 
   // Intersection Observer to track active section
   useEffect(() => {
@@ -63,9 +100,41 @@ const Index = () => {
           title: "Konami Code Activated!",
           description: "You found an easter egg! Tanay would be impressed.",
         });
+        setEasterEggType("konami");
         setShowEasterEgg(true);
         setTimeout(() => setShowEasterEgg(false), 5000);
         setKonami([]);
+      }
+      
+      // "TANAY" easter egg
+      if (e.key === 't' || e.key === 'T') {
+        const typed = e.key.toLowerCase();
+        const expectedSequence = ['t', 'a', 'n', 'a', 'y'];
+        
+        if (typed === expectedSequence[0]) {
+          const typingTimer = setTimeout(() => {
+            const input = document.getElementById("typing-detector") as HTMLInputElement;
+            if (input) {
+              input.value = "";
+            }
+          }, 2000);
+          
+          const input = document.getElementById("typing-detector") as HTMLInputElement;
+          if (input) {
+            input.value += typed;
+            if (input.value.toLowerCase() === 'tanay') {
+              toast({
+                title: "Name Easter Egg Found!",
+                description: "You spelled my name! Here's a special animation.",
+              });
+              setEasterEggType("name");
+              setShowEasterEgg(true);
+              setTimeout(() => setShowEasterEgg(false), 3000);
+              input.value = "";
+              clearTimeout(typingTimer);
+            }
+          }
+        }
       }
     };
 
@@ -75,6 +144,48 @@ const Index = () => {
     };
   }, [konami, toast]);
 
+  // TM Logo Easter Egg
+  const handleLogoClick = () => {
+    setClickCount(clickCount + 1);
+    
+    if (clickCount === 5) {
+      toast({
+        title: "Logo Easter Egg Found!",
+        description: "You clicked the logo 6 times! Secret message: Code is poetry.",
+      });
+      setEasterEggType("logo");
+      setShowEasterEgg(true);
+      setTimeout(() => setShowEasterEgg(false), 3000);
+      setClickCount(0);
+    }
+  };
+
+  // Coffee lover easter egg
+  const handleSecretAreaClick = () => {
+    setSecretClicks(secretClicks + 1);
+    
+    if (secretClicks === 2) {
+      toast({
+        title: "Coffee Lover Easter Egg!",
+        description: "You found Tanay's secret: He loves coffee while coding!",
+      });
+      setEasterEggType("coffee");
+      setShowEasterEgg(true);
+      setTimeout(() => setShowEasterEgg(false), 3000);
+      setSecretClicks(0);
+    }
+  };
+
+  // Sparkles Easter Egg
+  const handleDoubleClick = () => {
+    setShowSparkles(true);
+    setTimeout(() => setShowSparkles(false), 2000);
+    toast({
+      title: "Sparkles!",
+      description: "Double-clicking creates magic ✨",
+    });
+  };
+
   const scrollToSection = (sectionId: string) => {
     const section = document.getElementById(sectionId);
     if (section) {
@@ -83,13 +194,26 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white" onDoubleClick={handleDoubleClick}>
+      {/* Hidden typing detector for easter egg */}
+      <input 
+        id="typing-detector" 
+        className="opacity-0 h-0 w-0 absolute -z-10" 
+        type="text"
+        aria-hidden="true"
+      />
+      
       {/* Header/Navigation */}
       <header className="fixed top-0 w-full bg-white/80 backdrop-blur-sm border-b border-gray-100 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <span className="text-lg font-semibold text-blue-700">TM</span>
+              <span 
+                className="text-lg font-semibold text-blue-700 cursor-pointer transition-transform hover:scale-110 duration-300" 
+                onClick={handleLogoClick}
+              >
+                TM
+              </span>
             </div>
             <nav className="hidden md:flex space-x-8">
               {[
@@ -131,12 +255,18 @@ const Index = () => {
           id="home"
           className="min-h-screen flex items-center justify-center relative overflow-hidden"
         >
+          <div className="absolute inset-0 pointer-events-none">
+            <div 
+              ref={blob1Ref}
+              className="absolute top-1/3 left-1/4 w-64 h-64 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse-slow transition-transform duration-700"
+            ></div>
+            <div 
+              ref={blob2Ref}
+              className="absolute bottom-1/3 right-1/4 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse-slow animation-delay-1000 transition-transform duration-700"
+            ></div>
+          </div>
+          
           <div className="section-container text-center">
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute top-1/3 left-1/4 w-64 h-64 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse-slow"></div>
-              <div className="absolute bottom-1/3 right-1/4 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse-slow animation-delay-1000"></div>
-            </div>
-            
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -165,6 +295,13 @@ const Index = () => {
               <div className="mt-6 text-sm text-gray-400 hidden-text">
                 Psst... <span>Try the Konami code: ↑↑↓↓←→←→BA</span>
               </div>
+              
+              {/* Secret clickable area for coffee easter egg */}
+              <div 
+                className="absolute -bottom-12 right-0 w-8 h-8 opacity-0 cursor-pointer" 
+                onClick={handleSecretAreaClick}
+                aria-hidden="true"
+              ></div>
             </motion.div>
           </div>
         </section>
@@ -258,11 +395,13 @@ const Index = () => {
                           <span className="text-gray-700">{skill.name}</span>
                           <span className="text-gray-500">{skill.level}%</span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-blue-600 h-2 rounded-full"
-                            style={{ width: `${skill.level}%` }}
-                          ></div>
+                        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden group">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            whileInView={{ width: `${skill.level}%` }}
+                            transition={{ duration: 1, ease: "easeOut" }}
+                            className="bg-blue-600 h-2 rounded-full group-hover:bg-blue-500"
+                          />
                         </div>
                       </div>
                     ))}
@@ -283,7 +422,7 @@ const Index = () => {
                     ].map((skill) => (
                       <div
                         key={skill.name}
-                        className="flex flex-col items-center p-4 rounded-lg bg-white border border-gray-100 shadow-sm hover:shadow transition-shadow duration-300"
+                        className="flex flex-col items-center p-4 rounded-lg bg-white border border-gray-100 shadow-sm hover:shadow transition-shadow duration-300 hover:scale-105 transform"
                       >
                         <span className="text-2xl mb-2">{skill.icon}</span>
                         <span className="text-gray-700 text-center">{skill.name}</span>
@@ -333,9 +472,13 @@ const Index = () => {
                     icon: "📊",
                   },
                 ].map((project, index) => (
-                  <div
+                  <motion.div
                     key={index}
-                    className="glass-card rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    whileHover={{ y: -5, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
+                    className="glass-card rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300"
                   >
                     <div className="p-6">
                       <div className="text-4xl mb-4">{project.icon}</div>
@@ -354,7 +497,7 @@ const Index = () => {
                         <p className="mt-2 text-sm text-gray-600">{project.details}</p>
                       </details>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </motion.div>
@@ -375,7 +518,7 @@ const Index = () => {
               </h2>
               
               <div className="max-w-3xl mx-auto">
-                <div className="glass-card rounded-xl p-6 md:p-8 shadow-md">
+                <div className="glass-card rounded-xl p-6 md:p-8 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-[1.01]">
                   <div className="flex flex-col md:flex-row justify-between mb-4">
                     <div>
                       <h3 className="text-xl font-semibold text-gray-900">
@@ -427,7 +570,7 @@ const Index = () => {
               <div className="max-w-3xl mx-auto space-y-8">
                 <div className="relative pl-8 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-0.5 before:bg-blue-200">
                   <div className="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-blue-500 transform -translate-x-1/2"></div>
-                  <div className="glass-card rounded-xl p-6 shadow-md">
+                  <div className="glass-card rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-300 transform hover:translate-x-1">
                     <h3 className="text-xl font-semibold text-gray-900">RV Institute of Technology and Management</h3>
                     <p className="text-blue-600">B.E. in Information Science</p>
                     <p className="text-gray-600">2023 - Present</p>
@@ -436,7 +579,7 @@ const Index = () => {
                 
                 <div className="relative pl-8 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-0.5 before:bg-blue-200">
                   <div className="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-blue-500 transform -translate-x-1/2"></div>
-                  <div className="glass-card rounded-xl p-6 shadow-md">
+                  <div className="glass-card rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-300 transform hover:translate-x-1">
                     <h3 className="text-xl font-semibold text-gray-900">Sri Chaitanya PU and CBSE College</h3>
                     <p className="text-gray-600">11th and 12th Grade</p>
                   </div>
@@ -444,7 +587,7 @@ const Index = () => {
                 
                 <div className="relative pl-8 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-0.5 before:bg-blue-200">
                   <div className="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-blue-500 transform -translate-x-1/2"></div>
-                  <div className="glass-card rounded-xl p-6 shadow-md">
+                  <div className="glass-card rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-300 transform hover:translate-x-1">
                     <h3 className="text-xl font-semibold text-gray-900">Sri Chaitanya Techno School</h3>
                     <p className="text-gray-600">8th to 10th Grade</p>
                   </div>
@@ -452,7 +595,7 @@ const Index = () => {
                 
                 <div className="relative pl-8 before:content-[''] before:absolute before:left-0 before:top-0 before:bottom-0 before:w-0.5 before:bg-blue-200">
                   <div className="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-blue-500 transform -translate-x-1/2"></div>
-                  <div className="glass-card rounded-xl p-6 shadow-md">
+                  <div className="glass-card rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-300 transform hover:translate-x-1">
                     <h3 className="text-xl font-semibold text-gray-900">Clarence Public School, Bangalore</h3>
                     <p className="text-gray-600">Up to 7th Grade</p>
                   </div>
@@ -483,14 +626,15 @@ const Index = () => {
                       icon: "📊",
                     },
                   ].map((cert, index) => (
-                    <div
+                    <motion.div
                       key={index}
-                      className="glass-card rounded-xl p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-shadow duration-300"
+                      whileHover={{ y: -5, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
+                      className="glass-card rounded-xl p-4 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all duration-300"
                     >
                       <div className="text-2xl mb-2">{cert.icon}</div>
                       <h4 className="font-medium text-gray-900">{cert.title}</h4>
                       <p className="text-sm text-gray-500">{cert.issuer}</p>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               </div>
@@ -502,7 +646,7 @@ const Index = () => {
                 </h3>
                 
                 <div className="max-w-3xl mx-auto">
-                  <div className="glass-card rounded-xl p-6 shadow-md">
+                  <div className="glass-card rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-[1.01]">
                     <div className="mb-4 flex items-center">
                       <Trophy className="text-blue-500 mr-2" size={24} />
                       <h4 className="text-xl font-medium text-gray-900">Track & Field</h4>
@@ -537,8 +681,8 @@ const Index = () => {
               
               <div className="flex flex-col md:flex-row items-center justify-center space-y-6 md:space-y-0 md:space-x-12">
                 <a
-                  href="mailto:mail@example.com"
-                  className="glass-card flex flex-col items-center p-6 rounded-xl w-60 hover:shadow-md transition-shadow duration-300"
+                  href="tel:9448529581"
+                  className="glass-card flex flex-col items-center p-6 rounded-xl w-60 hover:shadow-md transition-all duration-300 transform hover:scale-105"
                   onClick={(e) => {
                     e.preventDefault();
                     navigator.clipboard.writeText("9448529581");
@@ -554,19 +698,19 @@ const Index = () => {
                 </a>
                 
                 <a
-                  href="mailto:mail@example.com"
-                  className="glass-card flex flex-col items-center p-6 rounded-xl w-60 hover:shadow-md transition-shadow duration-300"
+                  href="mailto:socials.tanay@gmail.com"
+                  className="glass-card flex flex-col items-center p-6 rounded-xl w-60 hover:shadow-md transition-all duration-300 transform hover:scale-105"
                 >
                   <Mail className="text-blue-600 mb-3" size={28} />
                   <h3 className="text-lg font-medium text-gray-900 mb-1">Email</h3>
-                  <p className="text-gray-600">mail@example.com</p>
+                  <p className="text-gray-600">socials.tanay@gmail.com</p>
                 </a>
                 
                 <a
-                  href="https://linkedin.com/in/username"
+                  href="https://www.linkedin.com/in/tanaymalepati/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="glass-card flex flex-col items-center p-6 rounded-xl w-60 hover:shadow-md transition-shadow duration-300"
+                  className="glass-card flex flex-col items-center p-6 rounded-xl w-60 hover:shadow-md transition-all duration-300 transform hover:scale-105"
                 >
                   <Linkedin className="text-blue-600 mb-3" size={28} />
                   <h3 className="text-lg font-medium text-gray-900 mb-1">LinkedIn</h3>
@@ -584,12 +728,12 @@ const Index = () => {
             &copy; {new Date().getFullYear()} Tanay Malepati. All rights reserved.
           </p>
           <p className="text-gray-400 text-sm mt-2">
-            Designed and built with passion <span className="text-red-500">♥</span>
+            Designed and built with passion <Heart className="inline-block text-red-500 h-4 w-4" size={16} />
           </p>
         </div>
       </footer>
 
-      {/* Easter Egg Animation */}
+      {/* Easter Egg Animations */}
       <AnimatePresence>
         {showEasterEgg && (
           <motion.div
@@ -598,7 +742,47 @@ const Index = () => {
             exit={{ opacity: 0, scale: 0.8 }}
             className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none"
           >
-            <div className="text-7xl">🎉</div>
+            {easterEggType === "konami" && (
+              <div className="text-7xl">🎮</div>
+            )}
+            {easterEggType === "name" && (
+              <div className="text-7xl">🌟</div>
+            )}
+            {easterEggType === "logo" && (
+              <div className="text-7xl">💻</div>
+            )}
+            {easterEggType === "coffee" && (
+              <motion.div 
+                initial={{ y: 100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="text-7xl"
+              >
+                <Coffee size={100} className="text-amber-700" />
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      {/* Sparkles Easter Egg */}
+      <AnimatePresence>
+        {showSparkles && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 pointer-events-none z-50"
+          >
+            <div className="absolute" style={{ left: `${mousePosition.x - 20}px`, top: `${mousePosition.y - 20}px` }}>
+              <Sparkles className="text-yellow-400" size={40} />
+            </div>
+            <div className="absolute" style={{ left: `${mousePosition.x + 30}px`, top: `${mousePosition.y - 30}px` }}>
+              <Sparkles className="text-blue-400" size={30} />
+            </div>
+            <div className="absolute" style={{ left: `${mousePosition.x - 40}px`, top: `${mousePosition.y + 20}px` }}>
+              <Sparkles className="text-purple-400" size={35} />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
