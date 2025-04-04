@@ -199,4 +199,26 @@
     left: 130%;
     transition: all 0.5s ease-in-out;
   }
+  
+  /* Chatbot animations */
+  @keyframes pulse-ring {
+    0% { transform: scale(0.95); opacity: 0.7; }
+    50% { transform: scale(1.05); opacity: 0.3; }
+    100% { transform: scale(0.95); opacity: 0.7; }
+  }
+  
+  .pulse-ring {
+    animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+  }
+  
+  @keyframes blob-move {
+    0% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(20px, -10px) scale(1.05); }
+    66% { transform: translate(-15px, 10px) scale(0.95); }
+    100% { transform: translate(0px, 0px) scale(1); }
+  }
+  
+  .blob-animation {
+    animation: blob-move 12s ease-in-out infinite;
+  }
 }

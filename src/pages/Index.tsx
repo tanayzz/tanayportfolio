@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -20,6 +19,7 @@ import {
   Coffee
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ChatbotBubble from "@/components/ChatbotBubble";
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState("home");
@@ -33,16 +33,13 @@ const Index = () => {
   const [showSparkles, setShowSparkles] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   
-  // Refs for blur blobs
   const blob1Ref = useRef<HTMLDivElement>(null);
   const blob2Ref = useRef<HTMLDivElement>(null);
-  
-  // Track mouse position for blob movement
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
       
-      // Move blobs on mouse movement with a damping effect
       if (blob1Ref.current) {
         const x = (e.clientX / window.innerWidth) * 20 - 10;
         const y = (e.clientY / window.innerHeight) * 20 - 10;
@@ -62,7 +59,6 @@ const Index = () => {
     };
   }, []);
 
-  // Intersection Observer to track active section
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -86,7 +82,6 @@ const Index = () => {
     };
   }, []);
 
-  // Konami code easter egg
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const newKonami = [...konami, e.key];
@@ -106,7 +101,6 @@ const Index = () => {
         setKonami([]);
       }
       
-      // "TANAY" easter egg
       if (e.key === 't' || e.key === 'T') {
         const typed = e.key.toLowerCase();
         const expectedSequence = ['t', 'a', 'n', 'a', 'y'];
@@ -144,7 +138,6 @@ const Index = () => {
     };
   }, [konami, toast]);
 
-  // TM Logo Easter Egg
   const handleLogoClick = () => {
     setClickCount(clickCount + 1);
     
@@ -160,7 +153,6 @@ const Index = () => {
     }
   };
 
-  // Coffee lover easter egg
   const handleSecretAreaClick = () => {
     setSecretClicks(secretClicks + 1);
     
@@ -176,7 +168,6 @@ const Index = () => {
     }
   };
 
-  // Sparkles Easter Egg
   const handleDoubleClick = () => {
     setShowSparkles(true);
     setTimeout(() => setShowSparkles(false), 2000);
@@ -195,7 +186,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-white" onDoubleClick={handleDoubleClick}>
-      {/* Hidden typing detector for easter egg */}
       <input 
         id="typing-detector" 
         className="opacity-0 h-0 w-0 absolute -z-10" 
@@ -203,7 +193,6 @@ const Index = () => {
         aria-hidden="true"
       />
       
-      {/* Header/Navigation */}
       <header className="fixed top-0 w-full bg-white/80 backdrop-blur-sm border-b border-gray-100 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -240,7 +229,6 @@ const Index = () => {
               ))}
             </nav>
             <div className="md:hidden">
-              {/* Mobile menu button */}
               <button className="p-2 text-blue-700">
                 <span>Menu</span>
               </button>
@@ -250,7 +238,6 @@ const Index = () => {
       </header>
 
       <main className="pt-16">
-        {/* Hero Section */}
         <section
           id="home"
           className="min-h-screen flex items-center justify-center relative overflow-hidden"
@@ -291,12 +278,10 @@ const Index = () => {
                 <ArrowDown className="ml-2 h-4 w-4 group-hover:translate-y-1 transition-transform duration-300" />
               </button>
               
-              {/* Hidden Easter Egg Text */}
               <div className="mt-6 text-sm text-gray-400 hidden-text">
                 Psst... <span>Try the Konami code: ↑↑↓↓←→←→BA</span>
               </div>
               
-              {/* Secret clickable area for coffee easter egg */}
               <div 
                 className="absolute -bottom-12 right-0 w-8 h-8 opacity-0 cursor-pointer" 
                 onClick={handleSecretAreaClick}
@@ -306,65 +291,61 @@ const Index = () => {
           </div>
         </section>
 
-        {/* About Section */}
         <section id="about" className="py-20 bg-gray-50">
           <div className="section-container">
-            <div className="max-w-3xl mx-auto">
-              <motion.div
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                transition={{ duration: 0.8 }}
-                viewport={{ once: true }}
-              >
-                <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
-                  About Me
-                </h2>
-                <div className="glass-card rounded-xl p-6 md:p-8">
-                  <p className="text-gray-700 mb-6">
-                    I'm a tech and design enthusiast with a strong interest in UI/UX design. My passion lies 
-                    in creating intuitive interfaces that enhance user experiences and solve real-world problems.
-                  </p>
-                  <p className="text-gray-700 mb-6">
-                    Currently pursuing B.E. in Information Science, I'm constantly exploring new technologies 
-                    and design principles to create more effective digital experiences. I believe that good design 
-                    is not just about aesthetics but about creating functional, accessible, and delightful user experiences.
-                  </p>
-                  
-                  <div className="mt-8">
-                    <h3 className="text-xl font-semibold text-blue-700 mb-4 flex items-center">
-                      <Languages className="mr-2" size={20} />
-                      Languages
-                    </h3>
-                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <li className="flex items-center">
-                        <span className="h-2 w-2 bg-blue-500 rounded-full mr-2"></span>
-                        <span className="text-gray-700 font-medium">Telugu</span>
-                        <span className="text-gray-500 ml-2">(Native)</span>
-                      </li>
-                      <li className="flex items-center">
-                        <span className="h-2 w-2 bg-blue-500 rounded-full mr-2"></span>
-                        <span className="text-gray-700 font-medium">English</span>
-                        <span className="text-gray-500 ml-2">(Fluent)</span>
-                      </li>
-                      <li className="flex items-center">
-                        <span className="h-2 w-2 bg-blue-500 rounded-full mr-2"></span>
-                        <span className="text-gray-700 font-medium">Kannada</span>
-                        <span className="text-gray-500 ml-2">(Proficient)</span>
-                      </li>
-                      <li className="flex items-center">
-                        <span className="h-2 w-2 bg-blue-500 rounded-full mr-2"></span>
-                        <span className="text-gray-700 font-medium">Hindi</span>
-                        <span className="text-gray-500 ml-2">(Conversational)</span>
-                      </li>
-                    </ul>
-                  </div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
+                About Me
+              </h2>
+              <div className="glass-card rounded-xl p-6 md:p-8">
+                <p className="text-gray-700 mb-6">
+                  I'm a tech and design enthusiast with a strong interest in UI/UX design. My passion lies 
+                  in creating intuitive interfaces that enhance user experiences and solve real-world problems.
+                </p>
+                <p className="text-gray-700 mb-6">
+                  Currently pursuing B.E. in Information Science, I'm constantly exploring new technologies 
+                  and design principles to create more effective digital experiences. I believe that good design 
+                  is not just about aesthetics but about creating functional, accessible, and delightful user experiences.
+                </p>
+                
+                <div className="mt-8">
+                  <h3 className="text-xl font-semibold text-blue-700 mb-4 flex items-center">
+                    <Languages className="mr-2" size={20} />
+                    Languages
+                  </h3>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <li className="flex items-center">
+                      <span className="h-2 w-2 bg-blue-500 rounded-full mr-2"></span>
+                      <span className="text-gray-700 font-medium">Telugu</span>
+                      <span className="text-gray-500 ml-2">(Native)</span>
+                    </li>
+                    <li className="flex items-center">
+                      <span className="h-2 w-2 bg-blue-500 rounded-full mr-2"></span>
+                      <span className="text-gray-700 font-medium">English</span>
+                      <span className="text-gray-500 ml-2">(Fluent)</span>
+                    </li>
+                    <li className="flex items-center">
+                      <span className="h-2 w-2 bg-blue-500 rounded-full mr-2"></span>
+                      <span className="text-gray-700 font-medium">Kannada</span>
+                      <span className="text-gray-500 ml-2">(Proficient)</span>
+                    </li>
+                    <li className="flex items-center">
+                      <span className="h-2 w-2 bg-blue-500 rounded-full mr-2"></span>
+                      <span className="text-gray-700 font-medium">Hindi</span>
+                      <span className="text-gray-500 ml-2">(Conversational)</span>
+                    </li>
+                  </ul>
                 </div>
-              </motion.div>
-            </div>
+              </div>
+            </motion.div>
           </div>
         </section>
 
-        {/* Skills Section */}
         <section id="skills" className="py-20">
           <div className="section-container">
             <motion.div
@@ -378,7 +359,6 @@ const Index = () => {
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Technical Skills */}
                 <div className="glass-card rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
                   <h3 className="text-xl font-semibold text-blue-700 mb-6">
                     Technical Skills
@@ -408,7 +388,6 @@ const Index = () => {
                   </div>
                 </div>
 
-                {/* Soft Skills */}
                 <div className="glass-card rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
                   <h3 className="text-xl font-semibold text-blue-700 mb-6">
                     Soft Skills
@@ -435,7 +414,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Projects Section */}
         <section id="projects" className="py-20 bg-gray-50">
           <div className="section-container">
             <motion.div
@@ -504,7 +482,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Experience Section */}
         <section id="experience" className="py-20">
           <div className="section-container">
             <motion.div
@@ -554,7 +531,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Education Section */}
         <section id="education" className="py-20 bg-gray-50">
           <div className="section-container">
             <motion.div
@@ -602,7 +578,6 @@ const Index = () => {
                 </div>
               </div>
               
-              {/* Certifications & Courses */}
               <div className="mt-16">
                 <h3 className="text-2xl font-semibold text-center text-gray-900 mb-8">
                   Certifications & Courses
@@ -639,7 +614,6 @@ const Index = () => {
                 </div>
               </div>
               
-              {/* Extracurriculars & Achievements */}
               <div className="mt-16">
                 <h3 className="text-2xl font-semibold text-center text-gray-900 mb-8">
                   Extracurriculars & Achievements
@@ -660,7 +634,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Contact Section */}
         <section id="contact" className="py-20">
           <div className="section-container">
             <motion.div
@@ -733,7 +706,6 @@ const Index = () => {
         </div>
       </footer>
 
-      {/* Easter Egg Animations */}
       <AnimatePresence>
         {showEasterEgg && (
           <motion.div
@@ -765,7 +737,6 @@ const Index = () => {
         )}
       </AnimatePresence>
       
-      {/* Sparkles Easter Egg */}
       <AnimatePresence>
         {showSparkles && (
           <motion.div
@@ -786,6 +757,8 @@ const Index = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      
+      <ChatbotBubble chatbotUrl="https://www.chatbase.co/chatbot-iframe/wW7Sy4EnqLqgtjo77VepB" />
     </div>
   );
 };
